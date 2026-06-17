@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -13,7 +14,7 @@
         color: #d1d1d1;
         font-family: 'Inter', sans-serif;
         margin: 0;
-        padding: 40px 20px;
+        padding: 20px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -23,11 +24,6 @@
     .container {
         width: 100%;
         max-width: 1000px;
-    }
-
-    header {
-        text-align: center;
-        margin-bottom: 40px;
     }
 
     .rainbow-line {
@@ -62,10 +58,16 @@
         gap: 15px;
     }
 
+    max-width: 600px {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
     .card {
         background: #252525;
         border: 1px solid #333;
-        padding: 25px;
+        padding: 20px;
         position: relative;
     }
 
@@ -85,6 +87,7 @@
         box-sizing: border-box;
         font-family: inherit;
         font-size: 14px;
+        margin-bottom: 10px;
     }
 
     .analytics-link {
@@ -122,21 +125,10 @@
         color: #000;
         border: none;
         font-weight: bold;
+        width: 100%;
     }
 
-    .btn-primary:hover {
-        background: #ddd;
-    }
-
-    .status-dot {
-        height: 8px;
-        width: 8px;
-        background-color: #4caf50;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 5px;
-    }
-
+    /* Modal Styles */
     .modal {
         display: none;
         position: fixed;
@@ -144,16 +136,16 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.9);
+        background: rgba(0,0,0,0.8);
+        z-index: 1000;
         justify-content: center;
         align-items: center;
-        z-index: 1000;
     }
 
     .modal-content {
         background: #252525;
-        padding: 30px;
         border: 1px solid #333;
+        padding: 30px;
         width: 90%;
         max-width: 600px;
     }
@@ -161,100 +153,91 @@
 </head>
 <body>
 <div class="container">
-    <header>
-        <div class="rainbow-line"></div>
-    </header>
+    <div class="rainbow-line"></div>
 <div class="info-banner">
-    <span class="status-dot"></span>
-    <span>Partner: Vanya | Status: <span id="sync-status">Connected</span></span>
+    <span>Partner: Vanya</span>
+    <span>|</span>
+    <span>Status: Connected</span>
 </div>
 
 <div class="grid">
+    <!-- Analytics -->
     <div class="card">
-        <span class="card-label">analytics</span>
+        <span class="card-label">Analytics</span>
         <a href="https://studio.youtube.com" target="_blank" class="analytics-link">YouTube Studio</a>
         <a href="https://socialblade.com" target="_blank" class="analytics-link">Social Blade</a>
     </div>
 
+    <!-- Weekly Plans -->
     <div class="card">
+        <span class="card-label">Weekly Plans</span>
+        <textarea id="plansInput" placeholder="Enter plans..."></textarea>
+        <button class="btn-primary" onclick=
 
-span class="card-label">weekly plans</span>
-        <textarea id="weekly-plans" rows="4" placeholder="Enter plans..."></textarea>
-        <button class="btn-primary" style="margin-top:10px; width:100%;" onclick="saveData('plans')">Update Plans</button>
+updateData('plans', 'plansInput')">Update Plans</button>
     </div>
 
-    <div class="card" style="grid-column: span 2;">
-        <span class="card-label">idea incubator</span>
-        <button onclick="openModal()" style="width:100%;">Open Ideas Notepad</button>
+    <!-- References -->
+    <div class="card">
+        <span class="card-label">References</span>
+        <textarea id="refsInput" placeholder="Links to cool videos/previews..."></textarea>
+        <button class="btn-primary" onclick="updateData('references', 'refsInput')">Update Refs</button>
+    </div>
+
+    <!-- Idea Incubator -->
+    <div class="card">
+        <span class="card-label">Idea Incubator</span>
+        <button class="btn-primary" onclick="toggleModal(true)">Open Ideas Notepad</button>
     </div>
 </div>
 </div>
-<div id="ideaModal" class="modal">
+<!-- Modal -->
+<div id="ideasModal" class="modal">
     <div class="modal-content">
-        <span class="card-label">ideas notepad</span>
-        <textarea id="ideas-content" rows="12" placeholder="Dump your ideas here..."></textarea>
-        <div style="margin-top:20px; display:flex; gap:10px;">
-            <button class="btn-primary" style="flex:1;" onclick="saveData('ideas')">Save Changes</button>
-            <button style="flex:1;" onclick="closeModal()">Cancel</button>
+        <span class="card-label">Ideas Notepad</span>
+        <textarea id="ideasInput" style="height: 300px;" placeholder="Dump your ideas here..."></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="updateData('ideas', 'ideasInput')">Save & Sync</button>
+            <button onclick="toggleModal(false)">Close</button>
         </div>
     </div>
 </div>
 <script>
-    const SUPABASE_URL = 'https://vnutkfdyphcvvgixhgdb.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudXRrZmR5cGhjdnZnaXhoZ2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTMwMDEsImV4cCI6MjA5NzI2OTAwMX0.wLpRW_M5fTrR1m9FrLGlmNZI7xXSASj2DlbN2DxgqUw';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Initialize Supabase
+    const supabaseUrl = 'https://vnutkfdyphcvvgixhgdb.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudXRrZmR5cGhjdnZnaXhoZ2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTMwMDEsImV4cCI6MjA5NzI2OTAwMX0.wLpRW_M5fTrR1m9FrLGlmNZI7xXSASj2DlbN2DxgqUw';
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+    async function updateData(column, inputId) {
+        const value = document.getElementById(inputId).value;
+        const { error } = await _supabase
+            .from('dashboard')
+            .update({ [column]: value })
+            .eq('id', 1);
+        
+        if (error) alert('Error: ' + error.message);
+        else alert('Updated successfully!');
+    }
+
+    function toggleModal(show) {
+        document.getElementById('ideasModal').style.display = show ? 'flex' : 'none';
+    }
+
+    // Load initial data
     async function loadData() {
-        document.getElementById('sync-status').innerText = 'Loading...';
-        try {
-            let { data, error } = await supabaseClient.from('dashboard_data').select('*');
-            if (error) throw error;
-            if (data) {
-                data.forEach(item => {
-                    if (item.type === 'plans') document.getElementById('weekly-plans').value = item.content;
-                    if (item.type === 'ideas') document.getElementById('ideas-content').value = item.content;
-                });
-            }
-            document.getElementById('sync-status').innerText = 'Synced';
-        } catch (e) {
-            console.error(e);
-            document.getElementById('sync-status').innerText = 'Error';
+        const { data, error } = await _supabase
+            .from('dashboard')
+            .select('*')
+            .eq('id', 1)
+            .single();
+        
+        if (data) {
+            document.getElementById('plansInput').value = data.plans || '';
+            document.getElementById('refsInput').value = data.references || '';
+            document.getElementById('ideasInput').value = data.ideas || '';
         }
     }
-
-    async function saveData(type) {
-        const content = type === 'plans' ? document.getElementById('weekly-plans').value : document.getElementById('ideas-content').value;
-        document.getElementById('sync-status').innerText = 'Saving...';
-
-        try {
-            const { data, error: updateError } = await supabaseClient
-                .from('dashboard_data')
-                .update({ content: content })
-                .eq('type', type)
-                .select();
-
-            if (!updateError && (!data || data.length === 0)) {
-                const { error: insertError } = await supabaseClient
-                    .from('dashboard_data')
-                    .insert({ type: type, content: content });
-                if (insertError) throw insertError;
-            } else if (updateError) {
-                throw updateError;
-            }
-
-            document.getElementById('sync-status').innerText = 'Saved';
-            if (type === 'ideas') closeModal();
-        } catch (e) {
-            console.error(e);
-            document.getElementById('sync-status').innerText = 'Error';
-            alert('Save failed: ' + e.message);
-        }
-    }
-
-    function openModal() { document.getElementById('ideaModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('ideaModal').style.display = 'none'; }
-
     loadData();
 </script>
 </body>
-</html> <
+</html>"
