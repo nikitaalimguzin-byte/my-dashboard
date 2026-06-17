@@ -128,7 +128,6 @@
         width: 100%;
     }
 
-    /* Modal Styles */
     .modal {
         display: none;
         position: fixed;
@@ -161,37 +160,30 @@
 </div>
 
 <div class="grid">
-    <!-- Analytics -->
     <div class="card">
         <span class="card-label">Analytics</span>
         <a href="https://studio.youtube.com" target="_blank" class="analytics-link">YouTube Studio</a>
         <a href="https://socialblade.com" target="_blank" class="analytics-link">Social Blade</a>
     </div>
 
-    <!-- Weekly Plans -->
     <div class="card">
         <span class="card-label">Weekly Plans</span>
         <textarea id="plansInput" placeholder="Enter plans..."></textarea>
-        <button class="btn-primary" onclick=
-
-updateData('plans', 'plansInput')">Update Plans</button>
+        <button class="btn-primary" onclick="updateData('plans', 'plansInput')">Update Plans</button>
     </div>
 
-    <!-- References -->
-    <div class="card">
+<div class="card">
         <span class="card-label">References</span>
         <textarea id="refsInput" placeholder="Links to cool videos/previews..."></textarea>
-        <button class="btn-primary" onclick="updateData('references', 'refsInput')">Update Refs</button>
+        <button class="btn-primary" onclick="updateData('refs', 'refsInput')">Update Refs</button>
     </div>
 
-    <!-- Idea Incubator -->
     <div class="card">
         <span class="card-label">Idea Incubator</span>
         <button class="btn-primary" onclick="toggleModal(true)">Open Ideas Notepad</button>
     </div>
 </div>
 </div>
-<!-- Modal -->
 <div id="ideasModal" class="modal">
     <div class="modal-content">
         <span class="card-label">Ideas Notepad</span>
@@ -203,17 +195,17 @@ updateData('plans', 'plansInput')">Update Plans</button>
     </div>
 </div>
 <script>
-    // Initialize Supabase
     const supabaseUrl = 'https://vnutkfdyphcvvgixhgdb.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudXRrZmR5cGhjdnZnaXhoZ2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTMwMDEsImV4cCI6MjA5NzI2OTAwMX0.wLpRW_M5fTrR1m9FrLGlmNZI7xXSASj2DlbN2DxgqUw';
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    async function updateData(column, inputId) {
+    async function updateData(type, inputId) {
         const value = document.getElementById(inputId).value;
         const { error } = await _supabase
-            .from('dashboard')
-            .update({ [column]: value })
-            .eq('id', 1);
+            .from('dashboard_data')
+            .update({ content: value })
+            .eq('id', 1)
+            .eq('type', type);
         
         if (error) alert('Error: ' + error.message);
         else alert('Updated successfully!');
@@ -223,21 +215,21 @@ updateData('plans', 'plansInput')">Update Plans</button>
         document.getElementById('ideasModal').style.display = show ? 'flex' : 'none';
     }
 
-    // Load initial data
     async function loadData() {
         const { data, error } = await _supabase
-            .from('dashboard')
+            .from('dashboard_data')
             .select('*')
-            .eq('id', 1)
-            .single();
+            .eq('id', 1);
         
         if (data) {
-            document.getElementById('plansInput').value = data.plans || '';
-            document.getElementById('refsInput').value = data.references || '';
-            document.getElementById('ideasInput').value = data.ideas || '';
+            data.forEach(row => {
+                if (row.type === 'plans') document.getElementById('plansInput').value = row.content || '';
+                if (row.type === 'refs') document.getElementById('refsInput').value = row.content || '';
+                if (row.type === 'ideas') document.getElementById('ideasInput').value = row.content || '';
+            });
         }
     }
     loadData();
 </script>
 </body>
-</html>"
+</html>
