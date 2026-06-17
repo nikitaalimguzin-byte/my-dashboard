@@ -1,133 +1,92 @@
 
-
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Dashboard | Nikita & Vanya</title>
+    <title>YouTube Project Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-    body {
-        background-color: #1a1a1a;
-        color: #d1d1d1;
-        font-family: 'Inter', sans-serif;
+        :root {
+            --bg-image: url('https://vnutkfdyphcvvgixhgdb.supabase.co/storage/v1/object/public/assets/money-kid.jpg'); /* Replace with your actual hosted image URL if needed */
+            --overlay: rgba(0, 0, 0, 0.7);
+            --accent: #ffffff;
+            --border: #333;
+        }
+    * {
+        box-sizing: border-box;
         margin: 0;
-        padding: 20px;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Courier New', Courier, monospace;
+        background-image: linear-gradient(var(--overlay), var(--overlay)), var(--bg-image);
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: #fff;
         display: flex;
-        flex-direction: column;
+        justify-content: center;
         align-items: center;
         min-height: 100vh;
+        padding: 20px;
     }
 
     .container {
         width: 100%;
-        max-width: 1000px;
+        max-width: 800px;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid var(--border);
+        padding: 30px;
+        text-align: center;
     }
 
-    .rainbow-line {
-        height: 1px;
-        width: 100%;
-        background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
-        background-size: 200% 100%;
-        animation: moveGradient 5s linear infinite;
-        margin-bottom: 20px;
-    }
-
-    @keyframes moveGradient {
-        0% { background-position: 0% 0%; }
-        100% { background-position: 200% 0%; }
-    }
-
-    .info-banner {
-        border: 1px solid #4caf50;
-        background: rgba(76, 175, 80, 0.05);
-        color: #4caf50;
-        padding: 10px 15px;
-        font-size: 13px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
     }
 
     .grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-    }
-
-    max-width: 600px {
-        .grid {
-            grid-template-columns: 1fr;
-        }
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
     }
 
     .card {
-        background: #252525;
-        border: 1px solid #333;
+        border: 1px solid var(--border);
         padding: 20px;
-        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
-    .card-label {
-        font-size: 12px;
-        color: #888;
-        margin-bottom: 15px;
-        display: block;
+    .card:hover {
+        background: #111;
+        border-color: #555;
     }
 
-    input, textarea {
-        width: 100%;
-        background: #1a1a1a;
-        border: 1px solid #333;
+    .btn {
+        background: none;
+        border: 1px solid #fff;
         color: #fff;
-        padding: 12px;
-        box-sizing: border-box;
-        font-family: inherit;
-        font-size: 14px;
-        margin-bottom: 10px;
-    }
-
-    .analytics-link {
-        display: block;
-        background: #1a1a1a;
-        border: 1px solid #333;
-        color: #fff;
-        text-decoration: none;
-        padding: 12px;
-        margin-bottom: 10px;
-        text-align: center;
-        font-size: 14px;
-    }
-
-    .analytics-link:hover {
-        background: #333;
-    }
-
-    button {
-        background: #333;
-        color: #fff;
-        border: 1px solid #444;
         padding: 10px 20px;
         cursor: pointer;
-        font-size: 13px;
-        transition: 0.2s;
+        font-family: inherit;
+        text-transform: uppercase;
+        transition: 0.3s;
     }
 
-    button:hover {
-        background: #444;
-    }
-
-    .btn-primary {
+    .btn:hover {
         background: #fff;
         color: #000;
-        border: none;
-        font-weight: bold;
-        width: 100%;
     }
 
+    /* Modal Styles */
     .modal {
         display: none;
         position: fixed;
@@ -135,101 +94,108 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.8);
-        z-index: 1000;
+        background: rgba(0,0,0,0.9);
         justify-content: center;
         align-items: center;
+        z-index: 100;
     }
 
     .modal-content {
-        background: #252525;
-        border: 1px solid #333;
-        padding: 30px;
+        background: #000;
+        border: 1px solid var(--border);
+        padding: 40px;
         width: 90%;
         max-width: 600px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 200px;
+        background: #111;
+        border: 1px solid var(--border);
+        color: #fff;
+        padding: 10px;
+        margin: 20px 0;
+        font-family: inherit;
     }
 </style>
 </head>
 <body>
 <div class="container">
-    <div class="rainbow-line"></div>
-<div class="info-banner">
-    <span>Partner: Vanya</span>
-    <span>|</span>
-    <span>Status: Connected</span>
-</div>
-
-<div class="grid">
-    <div class="card">
-        <span class="card-label">Analytics</span>
-        <a href="https://studio.youtube.com" target="_blank" class="analytics-link">YouTube Studio</a>
-        <a href="https://socialblade.com" target="_blank" class="analytics-link">Social Blade</a>
-    </div>
-
-    <div class="card">
-        <span class="card-label">Weekly Plans</span>
-        <textarea id="plansInput" placeholder="Enter plans..."></textarea>
-        <button class="btn-primary" onclick="updateData('plans', 'plansInput')">Update Plans</button>
-    </div>
-
-<div class="card">
-        <span class="card-label">References</span>
-        <textarea id="refsInput" placeholder="Links to cool videos/previews..."></textarea>
-        <button class="btn-primary" onclick="updateData('refs', 'refsInput')">Update Refs</button>
-    </div>
-
-    <div class="card">
-        <span class="card-label">Idea Incubator</span>
-        <button class="btn-primary" onclick="toggleModal(true)">Open Ideas Notepad</button>
-    </div>
-</div>
-</div>
-<div id="ideasModal" class="modal">
-    <div class="modal-content">
-        <span class="card-label">Ideas Notepad</span>
-        <textarea id="ideasInput" style="height: 300px;" placeholder="Dump your ideas here..."></textarea>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="btn-primary" onclick="updateData('ideas', 'ideasInput')">Save & Sync</button>
-            <button onclick="toggleModal(false)">Close</button>
+    <h1>Project Dashboard</h1>
+    
+    <div class="grid">
+        <div class="card" onclick="openModal('ideas')">
+            <h3>Idea Incubator</h3>
+            <p>Click to manage concepts</p>
+        </div>
+        <div class="card" onclick="openModal('references')">
+            <h3>References</h3>
+            <p>Visual & style inspiration</p>
+        </div>
+        <div class="card" onclick="window.open('https://studio.youtube.com', '_blank')">
+            <h3>Analytics</h3>
+            <p>View channel growth</p>
         </div>
     </div>
+
+    <button class="btn" onclick="saveAll()">Sync to Supabase</button>
 </div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h2 id="modal-title">Editor</h2>
+        <textarea id="modal-text" placeholder="Type here..."></textarea>
+        <button class="btn" onclick="closeModal()">Close & Save</button>
+    </div>
+</div>
+
 <script>
     const supabaseUrl = 'https://vnutkfdyphcvvgixhgdb.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudXRrZmR5cGhjdnZnaXhoZ2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTMwMDEsImV4cCI6MjA5NzI2OTAwMX0.wLpRW_M5fTrR1m9FrLGlmNZI7xXSASj2DlbN2DxgqUw';
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+YouTube
+accounts.google.com
 
-    async function updateData(type, inputId) {
-        const value = document.getElementById(inputId).value;
-        const { error } = await _supabase
-            .from('dashboard_data')
-            .update({ content: value })
-            .eq('id', 1)
-            .eq('type', type);
-        
-        if (error) alert('Error: ' + error.message);
-        else alert('Updated successfully!');
-    }
+OTAwMX0.wLpRW_M5fTrR1m9FrLGlmNZI7xXSASj2DlbN2DxgqUw';
+    const supabase = supabasejs.createClient(supabaseUrl, supabaseKey);
 
-    function toggleModal(show) {
-        document.getElementById('ideasModal').style.display = show ? 'flex' : 'none';
-    }
+    let currentType = '';
+    let data = { ideas: '', references: '' };
 
     async function loadData() {
-        const { data, error } = await _supabase
-            .from('dashboard_data')
+        const { data: dbData, error } = await supabase
+            .from('projects')
             .select('*')
-            .eq('id', 1);
+            .single();
         
-        if (data) {
-            data.forEach(row => {
-                if (row.type === 'plans') document.getElementById('plansInput').value = row.content || '';
-                if (row.type === 'refs') document.getElementById('refsInput').value = row.content || '';
-                if (row.type === 'ideas') document.getElementById('ideasInput').value = row.content || '';
-            });
+        if (dbData) {
+            data.ideas = dbData.ideas || '';
+            data.references = dbData.references || '';
         }
     }
+
+    function openModal(type) {
+        currentType = type;
+        document.getElementById('modal-title').innerText = type.toUpperCase();
+        document.getElementById('modal-text').value = data[type];
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        data[currentType] = document.getElementById('modal-text').value;
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    async function saveAll() {
+        const { error } = await supabase
+            .from('projects')
+            .upsert({ id: 1, ...data });
+        
+        if (error) alert('Error saving: ' + error.message);
+        else alert('Synced successfully!');
+    }
+
     loadData();
 </script>
 </body>
-</html>
+</html>.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudXRrZmR5cGhjdnZnaXhoZ2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTMwMDEsImV4cCI6MjA5NzI2
