@@ -12,7 +12,7 @@
             --sidebar-bg: #111;
             --accent-color: #00ff41;
             --text-color: #fff;
-            --card-bg: rgba(20, 20, 20, 0.8);
+            --card-bg: rgba(20, 20, 20, 0.85);
         }
     body {
         margin: 0;
@@ -22,9 +22,11 @@
         display: flex;
         height: 100vh;
         overflow: hidden;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://i.ibb.co/v4m0m0m/money-kid.jpg');
+        /* Updated background image link */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://i.postimg.cc/v4m0m0m/money-kid.jpg');
         background-size: cover;
         background-position: center;
+        background-attachment: fixed;
     }
 
     /* Sidebar */
@@ -58,6 +60,7 @@
         transition: 0.3s;
         text-transform: uppercase;
         font-size: 0.8rem;
+        width: 100%;
     }
 
     .nav-btn:hover, .nav-btn.active {
@@ -94,7 +97,7 @@
         border: 1px solid #333;
         padding: 20px;
         margin-bottom: 20px;
-        backdrop-filter: blur(5px);
+        backdrop-filter: blur(10px);
     }
 
     h2 {
@@ -150,7 +153,7 @@
     </button>
     
     <div style="margin-top: auto;">
-        <button class="nav-btn" onclick="syncData()" style="width: 100%; border-color: var(--accent-color);">
+        <button class="nav-btn" onclick="syncData()" style="border-color: var(--accent-color);">
             Sync to Supabase
         </button>
         <div id="sync-status" class="status">Ready</div>
@@ -159,13 +162,14 @@
 
 <div class="main-content">
     <!-- Idea Incubator -->
-    <div id="incubator" class="section active">
-        <div class="card">
-            <h2>New Idea</h2>
+    <div id=
 YouTube
 accounts.google.com
 
-<textarea id="idea-input" rows="3" placeholder="Enter a new video concept..."></textarea>
+r" class="section active">
+        <div class="card">
+            <h2>New Idea</h2>
+            <textarea id="idea-input" rows="3" placeholder="Enter a new video concept..."></textarea>
             <button class="action-btn" onclick="saveIdea()">Add to Incubator</button>
         </div>
         <div id="ideas-list"></div>
@@ -186,7 +190,7 @@ accounts.google.com
 <script>
     const SUPABASE_URL = 'https://vnutkfdyphcvvgixhgdb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudXRrZmR5cGhjdnZnaXhoZ2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTMwMDEsImV4cCI6MjA5NzI2OTAwMX0.wLpRW_M5fTrR1m9FrLGlmNZI7xXSASj2DlbN2DxgqUw';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -199,7 +203,7 @@ accounts.google.com
         const content = document.getElementById('idea-input').value;
         if (!content) return;
         
-        const { error } = await supabase.from('projects').insert([{ ideas: content }]);
+        const { error } = await supabaseClient.from('projects').insert([{ ideas: content }]);
         if (error) {
             alert('Error: ' + error.message);
         } else {
@@ -213,7 +217,7 @@ accounts.google.com
         const link = document.getElementById('ref-link').value;
         if (!title || !link) return;
 
-        const { error } = await supabase.from('projects').insert([{ references: `${title}: ${link}` }]);
+        const { error } = await supabaseClient.from('projects').insert([{ references: `${title}: ${link}` }]);
         if (error) {
             alert('Error: ' + error.message);
         } else {
@@ -224,7 +228,7 @@ accounts.google.com
     }
 
     async function loadData() {
-        const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('projects').select('*').order('created_at', { ascending: false });
         if (error) return;
 
         const ideasList = document.getElementById('ideas-list');
@@ -251,4 +255,4 @@ accounts.google.com
     loadData();
 </script>
 </body>
-</html>
+</html>"incubato
