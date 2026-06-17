@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Dashboard | Nikita & Vanya</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+    body {
+        background-color: #1a1a1a;
+        color: #d1d1d1;
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .rainbow-line {
+        height: 1px;
+        width: 100%;
+        background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+        background-size: 200% 100%;
+        animation: moveGradient 5s linear infinite;
+        margin-bottom: 20px;
+    }
+
+    @keyframes moveGradient {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 200% 0%; }
+    }
+
+    .info-banner {
+        border: 1px solid #4caf50;
+        background: rgba(76, 175, 80, 0.05);
+        color: #4caf50;
+        padding: 10px 15px;
+        font-size: 13px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .card {
+        background: #252525;
+        border: 1px solid #333;
+        padding: 25px;
+        position: relative;
+    }
+
+    .card-label {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    input, textarea {
+        width: 100%;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        color: #fff;
+        padding: 12px;
+        box-sizing: border-box;
+        font-family: inherit;
+        font-size: 14px;
+    }
+
+    .analytics-link {
+        display: block;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        color: #fff;
+        text-decoration: none;
+        padding: 12px;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .analytics-link:hover {
+        background: #333;
+    }
+
+    button {
+        background: #333;
+        color: #fff;
+        border: 1px solid #444;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #444;
+    }
+
+    .btn-primary {
+        background: #fff;
+        color: #000;
+        border: none;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background: #ddd;
+    }
+
+    .status-dot {
+        height: 8px;
+        width: 8px;
+        background-color: #4caf50;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: #252525;
+        padding: 30px;
+        border: 1px solid #333;
+        width: 90%;
+        max-width: 600px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="rainbow-line"></div>
+    </header>
+<div class="info-banner">
+    <span class="status-dot"></span>
+    <span>Partner: Vanya | Status: <span id="sync-status">Connected</span></span>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <span class="card-label">analytics</span>
+        <a href="https://studio.youtube.com" target="_blank" class="analytics-link">YouTube Studio</a>
+        <a href="https://socialblade.com" target="_blank" class="analytics-link">Social Blade</a>
+    </div>
+
+    <div class="card">
+
+span class="card-label">weekly plans</span>
+        <textarea id="weekly-plans" rows="4" placeholder="Enter plans..."></textarea>
+        <button class="btn-primary" style="margin-top:10px; width:100%;" onclick="saveData('plans')">Update Plans</button>
+    </div>
+
+    <div class="card" style="grid-column: span 2;">
+        <span class="card-label">idea incubator</span>
+        <button onclick="openModal()" style="width:100%;">Open Ideas Notepad</button>
+    </div>
+</div>
+</div>
+<div id="ideaModal" class="modal">
+    <div class="modal-content">
+        <span class="card-label">ideas notepad</span>
+        <textarea id="ideas-content" rows="12" placeholder="Dump your ideas here..."></textarea>
+        <div style="margin-top:20px; display:flex; gap:10px;">
+            <button class="btn-primary" style="flex:1;" onclick="saveData('ideas')">Save Changes</button>
+            <button style="flex:1;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+<script>
+    const SUPABASE_URL = 'https://vnutkfdyphcvvgixhgdb.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudXRrZmR5cGhjdnZnaXhoZ2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTMwMDEsImV4cCI6MjA5NzI2OTAwMX0.wLpRW_M5fTrR1m9FrLGlmNZI7xXSASj2DlbN2DxgqUw';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadData() {
+        document.getElementById('sync-status').innerText = 'Loading...';
+        try {
+            let { data, error } = await supabaseClient.from('dashboard_data').select('*');
+            if (error) throw error;
+            if (data) {
+                data.forEach(item => {
+                    if (item.type === 'plans') document.getElementById('weekly-plans').value = item.content;
+                    if (item.type === 'ideas') document.getElementById('ideas-content').value = item.content;
+                });
+            }
+            document.getElementById('sync-status').innerText = 'Synced';
+        } catch (e) {
+            console.error(e);
+            document.getElementById('sync-status').innerText = 'Error';
+        }
+    }
+
+    async function saveData(type) {
+        const content = type === 'plans' ? document.getElementById('weekly-plans').value : document.getElementById('ideas-content').value;
+        document.getElementById('sync-status').innerText = 'Saving...';
+
+        try {
+            const { data, error: updateError } = await supabaseClient
+                .from('dashboard_data')
+                .update({ content: content })
+                .eq('type', type)
+                .select();
+
+            if (!updateError && (!data || data.length === 0)) {
+                const { error: insertError } = await supabaseClient
+                    .from('dashboard_data')
+                    .insert({ type: type, content: content });
+                if (insertError) throw insertError;
+            } else if (updateError) {
+                throw updateError;
+            }
+
+            document.getElementById('sync-status').innerText = 'Saved';
+            if (type === 'ideas') closeModal();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('sync-status').innerText = 'Error';
+            alert('Save failed: ' + e.message);
+        }
+    }
+
+    function openModal() { document.getElementById('ideaModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('ideaModal').style.display = 'none'; }
+
+    loadData();
+</script>
+</body>
+</html> <
